@@ -62,4 +62,10 @@
         </set>
         where id = #{id}
     </update>
+
+    <select id="list" resultType="com.sky.entity.Dish">
+        # TODO
+
+    </select>
+
 </mapper>
