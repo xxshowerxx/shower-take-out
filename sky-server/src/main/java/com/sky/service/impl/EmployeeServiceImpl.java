@@ -161,7 +161,7 @@ public class EmployeeServiceImpl implements EmployeeService {
      */
     @Override
     public void updatePassword(PasswordEditDTO passwordEditDTO) {
-        //这里接口文档写错了，前端传来的body里没有empId，所以要通过ThreadLocal获取
+        //接口文档里多了empId参数，前端并没有传，所以要通过ThreadLocal获取
         Employee employee = employeeMapper.getById(BaseContext.getCurrentId());
         if (!employee.getPassword().equals(DigestUtils.md5DigestAsHex(passwordEditDTO.getOldPassword().getBytes()))) {
             //原密码错误
