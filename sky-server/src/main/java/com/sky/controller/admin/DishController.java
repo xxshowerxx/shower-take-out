@@ -109,11 +109,29 @@ public class DishController {
         return Result.success();
     }
 
+    /**
+     * 根据分类id或菜品名查询菜品
+     * 注：接口文档里只写了参数categoryId，而页面原型可以根据name查询
+     * @param categoryId
+     * @param name
+     * @return
+     */
     @GetMapping("/list")
-    @ApiOperation("根据分类id查询菜品")
-    public Result<List<Dish>> list(Long categoryId) {
-        log.info("根据分类id查询菜品：{}", categoryId);
-        List<Dish> list = dishService.list(categoryId);
+    @ApiOperation("根据分类id或菜品名查询菜品")
+    public Result<List<Dish>> list(
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) String name) {
+
+        List<Dish> list = null;
+
+        if (categoryId != null) {
+            log.info("根据分类id查询菜品：{}", categoryId);
+            list = dishService.listByCategoryId(categoryId);
+        } else if (name != null && name != "") {
+            log.info("根据菜品名查询菜品：{}", name);
+            list = dishService.listByName(name);
+        }
         return Result.success(list);
     }
+
 }
