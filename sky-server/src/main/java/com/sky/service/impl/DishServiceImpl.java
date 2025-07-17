@@ -85,7 +85,7 @@ public class DishServiceImpl implements DishService {
             }
         }
 
-        //判断当前菜品是否能被删除：是否存在被桃喰关联的菜品？
+        //判断当前菜品是否能被删除：是否存在被套餐关联的菜品？
         List<Long> setmealIds = setmealDishMapper.getSetmealIdsByDishIds(dishIds);
         if(setmealIds != null && setmealIds.size() > 0) {
             throw new DeletionNotAllowedException(MessageConstant.DISH_BE_RELATED_BY_SETMEAL);
