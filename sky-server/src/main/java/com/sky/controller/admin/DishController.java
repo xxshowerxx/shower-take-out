@@ -104,7 +104,7 @@ public class DishController {
     @PostMapping("/status/{status}")
     @ApiOperation("启用或禁用菜品")
     public Result startOrStop(@PathVariable Integer status, @RequestParam Long id) {
-        log.info("启用或禁用菜品：{}", id);
+        log.info("启用或禁用菜品：id {} ,status {}", id,  status == 1 ? "启用" : "禁用");
         dishService.startOrStop(status, id);
         return Result.success();
     }

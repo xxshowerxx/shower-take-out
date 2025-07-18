@@ -37,7 +37,6 @@ public class EmployeeController {
 
     /**
      * 登录
-     *
      * @param employeeLoginDTO
      * @return
      */
@@ -85,7 +84,7 @@ public class EmployeeController {
         return Result.success();
     }
 
-    /*
+    /**
      * 员工分页查询
      * @param employeePageQueryDTO
      * @return
@@ -108,7 +107,7 @@ public class EmployeeController {
     @PostMapping("/status/{status}")
     @ApiOperation("员工状态启用禁用")
     public Result startOrStop(@PathVariable Integer status, Long id) {
-        log.info("员工状态启用禁用：{},{}", status, id);
+        log.info("员工状态启用禁用：id {} ,status {}", id, status == 1 ? "启用" : "禁用");
         employeeService.startOrStop(status, id);
         return Result.success();
     }

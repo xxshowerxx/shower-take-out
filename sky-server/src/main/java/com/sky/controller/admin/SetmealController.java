@@ -88,7 +88,7 @@ public class SetmealController {
     @PostMapping("/status/{status}")
     @ApiOperation("启用或禁用套餐")
     public Result startOrStop(@PathVariable Integer status, @RequestParam Long id) {
-        log.info("套餐起售或停售：{}", id);
+        log.info("套餐起售或停售：id {} ,status {}", id , status == 1 ? "启用" : "停售");
         setmealService.startOrStop(status, id);
         return Result.success();
     }
