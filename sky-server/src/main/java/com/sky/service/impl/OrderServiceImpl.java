@@ -21,6 +21,7 @@ import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,8 +44,10 @@ public class OrderServiceImpl implements OrderService {
     private UserMapper userMapper;
     @Autowired
     private WeChatPayUtil weChatPayUtil;
+
     /**
      * 用户下单
+     *
      * @param ordersSubmitDTO
      * @return
      */
@@ -53,7 +56,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderSubmitVO submitOrder(OrdersSubmitDTO ordersSubmitDTO) {
         //处理业务异常情况（地址簿为空，购物车数据为空）
         AddressBook addressBook = addressBookMapper.getById(ordersSubmitDTO.getAddressBookId());
-        if(addressBook == null) {
+        if (addressBook == null) {
             //抛出业务异常，地址簿为空
             throw new AddressBookBusinessException(MessageConstant.ADDRESS_BOOK_IS_NULL);
         }
@@ -63,7 +66,7 @@ public class OrderServiceImpl implements OrderService {
         Long userId = BaseContext.getCurrentId();
         shoppingCart.setUserId(userId);
         List<ShoppingCart> shoppingCartList = shoppingCartMapper.list(shoppingCart);
-        if(shoppingCartList == null || shoppingCartList.size() == 0) {
+        if (shoppingCartList == null || shoppingCartList.size() == 0) {
             //抛出业务异常，购物车数据为空
             throw new ShoppingCartBusinessException(MessageConstant.SHOPPING_CART_IS_NULL);
         }
@@ -130,7 +133,7 @@ public class OrderServiceImpl implements OrderService {
 
 
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("code","ORDERPAID");
+        jsonObject.put("code", "ORDERPAID");
         OrderPaymentVO vo = jsonObject.toJavaObject(OrderPaymentVO.class);
         vo.setPackageStr(jsonObject.getString("package"));
         Integer OrderPaidStatus = Orders.PAID;//支付状态，已支付
@@ -165,6 +168,7 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 查询历史订单
+     *
      * @param ordersPageQueryDTO
      * @return
      */
@@ -176,18 +180,37 @@ public class OrderServiceImpl implements OrderService {
         //分页条件查询，先查询订单
         Page<Orders> page = orderMapper.pageQuery(ordersPageQueryDTO);
         List<OrderVO> orderVOList = new ArrayList<>();
-        if(page != null && page.size() > 0) {
+        if (page != null && page.size() > 0) {
             //再查询订单详情
             for (Orders orders : page) {
                 Long orderId = orders.getId();
                 List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(orderId);
                 OrderVO orderVO = new OrderVO();
-                BeanUtils.copyProperties(orders,orderVO);
+                BeanUtils.copyProperties(orders, orderVO);
                 orderVO.setOrderDetailList(orderDetailList);
                 orderVOList.add(orderVO);
             }
         }
+        //封装分页结果
         PageResult pageResult = new PageResult(page.getTotal(), orderVOList);
         return pageResult;
+    }
+
+    /**
+     * 根据id查询订单详情
+     *
+     * @param id
+     * @return
+     */
+    public OrderVO details(Long id) {
+        //根据订单id查询订单
+        Orders orders = orderMapper.getById(id);
+        //根据订单id查询该订单对应的菜品/套餐详情
+        List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(id);
+        //将该订单和详情封装到OrderVO并返回
+        OrderVO orderVO = new OrderVO();
+        BeanUtils.copyProperties(orders, orderVO);
+        orderVO.setOrderDetailList(orderDetailList);
+        return orderVO;
     }
 }
