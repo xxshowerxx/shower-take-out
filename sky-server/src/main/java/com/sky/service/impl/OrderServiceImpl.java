@@ -168,7 +168,6 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 查询历史订单
-     *
      * @param ordersPageQueryDTO
      * @return
      */
@@ -198,7 +197,6 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 根据id查询订单详情
-     *
      * @param id
      * @return
      */
@@ -212,5 +210,65 @@ public class OrderServiceImpl implements OrderService {
         BeanUtils.copyProperties(orders, orderVO);
         orderVO.setOrderDetailList(orderDetailList);
         return orderVO;
+    }
+
+    /**
+     * 用户取消订单
+     * @param id
+     */
+    @Override
+    public void cancelById(Long id) throws Exception{
+        //根据订单id查询订单
+        Orders orders = orderMapper.getById(id);
+        //异常判断
+        if (orders == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+        //订单状态 1待付款 2待接单 3已接单 4派送中 5已完成 6已取消
+        if (orders.getStatus() > 2) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+        // 订单处于待接单状态下取消，需要进行退款
+        if (orders.getStatus().equals(Orders.TO_BE_CONFIRMED)) {
+            //调用微信支付退款接口
+           /* weChatPayUtil.refund(
+                    orders.getNumber(), //商户订单号
+                    orders.getNumber(), //商户退款单号
+                    new BigDecimal(0.01),//退款金额，单位 元
+                    new BigDecimal(0.01));//原订单金额
+            */
+            //支付状态修改为 退款
+            orders.setPayStatus(Orders.REFUND);
+        }
+        // 更新订单状态、取消原因、取消时间
+        orders.setStatus(Orders.CANCELLED);
+        orders.setCancelReason("用户取消");
+        orders.setCancelTime(LocalDateTime.now());
+        orderMapper.update(orders);
+    }
+
+    @Override
+    public void repetition(Long id) {
+        //根据订单id查询订单
+        Orders orders = orderMapper.getById(id);
+        //根据订单id查询订单详情
+        List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(id);
+        //逐一修改并批量插入购物车信息
+        List<ShoppingCart> shoppingCartList = new ArrayList<>();
+        for (OrderDetail orderDetail : orderDetailList) {
+            ShoppingCart shoppingCart = ShoppingCart.builder()
+                    .name(orderDetail.getName())
+                    .image(orderDetail.getImage())
+                    .userId(BaseContext.getCurrentId())
+                    .dishId(orderDetail.getDishId())
+                    .setmealId(orderDetail.getSetmealId())
+                    .dishFlavor(orderDetail.getDishFlavor())
+                    .number(orderDetail.getNumber())
+                    .amount(orderDetail.getAmount())
+                    .createTime(LocalDateTime.now())
+                    .build();
+            shoppingCartList.add(shoppingCart);
+        }
+        shoppingCartMapper.insertBatch(shoppingCartList);
     }
 }
