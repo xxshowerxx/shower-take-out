@@ -376,10 +376,10 @@ public class OrderServiceImpl implements OrderService {
             throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
         }
 
-        //支付状态
+        // 支付状态
         Integer payStatus = ordersDB.getPayStatus();
         if (payStatus == Orders.PAID) {
-            //用户已支付，需要退款
+            // 用户已支付，需要退款
             /*String refund = weChatPayUtil.refund(
                     ordersDB.getNumber(),
                     ordersDB.getNumber(),
@@ -393,6 +393,49 @@ public class OrderServiceImpl implements OrderService {
                 .id(ordersRejectionDTO.getId())
                 .status(Orders.CANCELLED)
                 .rejectionReason(ordersRejectionDTO.getRejectionReason())
+                .cancelTime(LocalDateTime.now())
+                .build();
+
+        orderMapper.update(orders);
+    }
+
+    /**
+     * 取消订单
+     * @param ordersCancelDTO
+     */
+    @Override
+    public void cancel(OrdersCancelDTO ordersCancelDTO) {
+        // 根据id查询订单
+        Orders ordersDB = orderMapper.getById(ordersCancelDTO.getId());
+
+        // 订单只有存在且状态不为2（待接单）和6（已取消）才可以取消
+        if (ordersDB == null || ordersDB.getStatus().equals(Orders.TO_BE_CONFIRMED) || ordersDB.getStatus().equals(Orders.CANCELLED)) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+
+
+        // 如果是状态5（已完成），则需要退款
+        if (ordersDB.getStatus().equals(Orders.COMPLETED)) {
+            // 支付状态
+            Integer payStatus = ordersDB.getPayStatus();
+            if (payStatus == Orders.PAID) {
+                // 用户已支付，需要退款
+            /*String refund = weChatPayUtil.refund(
+                    ordersDB.getNumber(),
+                    ordersDB.getNumber(),
+                    new BigDecimal(0.01),
+                    new BigDecimal(0.01));*/
+                log.info("申请退款：已模拟");
+            } else {
+                throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+            }
+
+        }
+        // 取消订单
+        Orders orders = Orders.builder()
+                .id(ordersCancelDTO.getId())
+                .status(Orders.CANCELLED)
+                .cancelReason(ordersCancelDTO.getCancelReason())
                 .cancelTime(LocalDateTime.now())
                 .build();
 
