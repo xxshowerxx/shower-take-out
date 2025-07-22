@@ -41,6 +41,7 @@
         </set>
         where id=#{id}
     </update>
+
     <select id="pageQuery" resultType="Orders">
         select * from orders
         <where>
@@ -65,4 +66,36 @@
         </where>
         order by order_time desc
     </select>
+
+    <update id="updateBatch">
+        <foreach collection="ordersList" item="order">
+            update orders
+            <set>
+                <if test="order.number != null"> number=#{order.number}, </if>
+                <if test="order.status != null"> status=#{order.status}, </if>
+                <if test="order.addressBookId != null"> address_book_id=#{order.addressBookId}, </if>
+                <if test="order.orderTime != null"> order_time=#{order.orderTime},</if>
+                <if test="order.checkoutTime != null"> checkout_time=#{order.checkoutTime}, </if>
+                <if test="order.payMethod != null"> pay_method=#{order.payMethod}, </if>
+                <if test="order.payStatus != null"> pay_status=#{order.payStatus}, </if>
+                <if test="order.amount != null"> amount=#{order.amount}, </if>
+                <if test="order.remark != null"> remark=#{order.remark}, </if>
+                <if test="order.phone != null"> phone=#{order.phone}, </if>
+                <if test="order.address != null"> address=#{order.address}, </if>
+                <if test="order.userName != null"> user_name=#{order.userName}, </if>
+                <if test="order.consignee != null"> consignee=#{order.consignee}, </if>
+                <if test="order.cancelReason != null"> cancel_reason=#{order.cancelReason}, </if>
+                <if test="order.rejectionReason != null"> rejection_reason=#{order.rejectionReason}, </if>
+                <if test="order.cancelTime != null"> cancel_time=#{order.cancelTime}, </if>
+                <if test="order.estimatedDeliveryTime != null"> estimated_delivery_time=#{order.estimatedDeliveryTime}, </if>
+                <if test="order.deliveryStatus != null"> delivery_status=#{order.deliveryStatus}, </if>
+                <if test="order.deliveryTime != null"> delivery_time=#{order.deliveryTime}, </if>
+                <if test="order.packAmount != null"> pack_amount=#{order.packAmount},</if>
+                <if test="order.tablewareNumber != null"> tableware_number=#{order.tablewareNumber}, </if>
+                <if test="order.tablewareStatus != null"> tableware_status=#{order.tablewareStatus}, </if>
+            </set>
+            where id = #{order.id}
+        </foreach>
+    </update>
+
 </mapper>

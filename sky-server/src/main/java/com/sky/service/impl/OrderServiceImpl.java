@@ -52,8 +52,8 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private WeChatPayUtil weChatPayUtil;
 
-    private final Integer PATTERN_SIMPLE = 1;
-    private final Integer PATTERN_DETAIL = 2;
+    public final Integer PATTERN_SIMPLE = 1;
+    public final Integer PATTERN_DETAIL = 2;
 
     @Value("${sky.shop.address}")
     private String shopAddress;
