@@ -54,11 +54,11 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private WebSocketServer webSocketServer;
 
-    public final Integer PATTERN_SIMPLE = 1;
-    public final Integer PATTERN_DETAIL = 2;
+    public final static Integer PATTERN_SIMPLE = 1;
+    public final static Integer PATTERN_DETAIL = 2;
 
-    public final Integer STATUS_NEW = 1;
-    public final Integer STATUS_REMINDER = 2;
+    public final static Integer STATUS_NEW = 1;
+    public final static Integer STATUS_REMINDER = 2;
 
     @Value("${sky.shop.address}")
     private String shopAddress;
@@ -137,6 +137,7 @@ public class OrderServiceImpl implements OrderService {
      * @param ordersPaymentDTO
      * @return
      */
+    @Override
     public OrderPaymentVO payment(OrdersPaymentDTO ordersPaymentDTO) throws Exception {
         // 当前登录用户id
         Long userId = BaseContext.getCurrentId();
@@ -180,6 +181,7 @@ public class OrderServiceImpl implements OrderService {
      *
      * @param outTradeNo
      */
+    @Override
     public void paySuccess(String outTradeNo) {
 
         // 根据订单号查询订单
@@ -219,6 +221,7 @@ public class OrderServiceImpl implements OrderService {
      * @param id
      * @return
      */
+    @Override
     public OrderVO details(Long id) {
         //根据订单id查询订单
         Orders orders = orderMapper.getById(id);
@@ -266,6 +269,10 @@ public class OrderServiceImpl implements OrderService {
         orderMapper.update(orders);
     }
 
+    /**
+     * 再来一单
+     * @param id
+     */
     @Override
     public void repetition(Long id) {
         //根据订单id查询订单
@@ -314,7 +321,7 @@ public class OrderServiceImpl implements OrderService {
      * @param pattern
      * @return
      */
-    public List<OrderVO> getOrderVOList(Page<Orders> page, Integer pattern) {
+    private List<OrderVO> getOrderVOList(Page<Orders> page, Integer pattern) {
         //需要返回订单菜品信息，自定义OrderVO响应结果
         List<OrderVO> orderVOList = new ArrayList<>();
 
@@ -344,7 +351,7 @@ public class OrderServiceImpl implements OrderService {
      * @param orderDetailList
      * @return
      */
-    public String getOrderDishesStr(List<OrderDetail> orderDetailList) {
+    private static String getOrderDishesStr(List<OrderDetail> orderDetailList) {
         // 将每一条订单菜品信息拼接为字符串（格式：宫保鸡丁*3；）
         List<String> orderDishList = orderDetailList.stream().map(x -> {
             String orderDish = x.getName() + "*" + x.getNumber() + ";";
