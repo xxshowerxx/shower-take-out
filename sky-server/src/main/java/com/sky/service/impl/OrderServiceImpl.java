@@ -29,7 +29,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,8 +57,8 @@ public class OrderServiceImpl implements OrderService {
     public final Integer PATTERN_SIMPLE = 1;
     public final Integer PATTERN_DETAIL = 2;
 
-    public final Integer STATUS_REMINDER = 1;
-    public final Integer PATTERN_HURRY = 2;
+    public final Integer STATUS_NEW = 1;
+    public final Integer STATUS_REMINDER = 2;
 
     @Value("${sky.shop.address}")
     private String shopAddress;
@@ -167,7 +166,7 @@ public class OrderServiceImpl implements OrderService {
 
         //通过websocket向客户端浏览器推送消息 type orderId content
         Map map = new HashMap();
-        map.put("type", STATUS_REMINDER);
+        map.put("type", STATUS_NEW);
         map.put("orderId", orderMapper.getByNumber(ordersPaymentDTO.getOrderNumber()).getId());
         map.put("content", "订单号：" + ordersPaymentDTO.getOrderNumber());
         String json = JSON.toJSONString(map);
@@ -393,6 +392,10 @@ public class OrderServiceImpl implements OrderService {
 
     }
 
+    /**
+     * 拒单
+     * @param ordersRejectionDTO
+     */
     @Override
     public void rejection(OrdersRejectionDTO ordersRejectionDTO) throws Exception {
         // 根据id查询订单
@@ -578,5 +581,24 @@ public class OrderServiceImpl implements OrderService {
             //配送距离超过5000米
             throw new OrderBusinessException("超出配送范围");
         }
+    }
+
+    /**
+     * 客户催单
+     * @param id
+     */
+    @Override
+    public void reminder(Long id) {
+        //根据id查询订单
+        Orders ordersDB = orderMapper.getById(id);
+        //校验订单是否存在
+        if (ordersDB == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+        Map map = new HashMap();
+        map.put("type",STATUS_REMINDER);
+        map.put("orderId",id);
+        map.put("content","订单号："+ordersDB.getNumber());
+        webSocketServer.sendToAllClient(JSON.toJSONString(map));
     }
 }
