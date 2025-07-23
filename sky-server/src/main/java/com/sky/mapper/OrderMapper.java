@@ -82,9 +82,16 @@ public interface OrderMapper {
     void updateBatch (List<Orders> ordersList);
 
     /**
-     * 根据动态条件统计营业额数据
+     * 根据动态条件统计营业额总数
      * @param map
      * @return
      */
     Double sumByMap(Map map);
+
+    /**
+     * 根据动态条件统计订单数量
+     * @param map
+     * @return
+     */
+    Integer countByMap(Map map);
 }
